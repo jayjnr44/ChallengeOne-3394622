@@ -1,60 +1,83 @@
-// TrieNode represents each node in the Trie
 class TrieNode {
     constructor() {
-        // Children is a map from character to TrieNode
-        this.children = {};
-        // isEndOfWord is true if the node represents the end of a word
+        this.children = new Array(26).fill(null); // for lowercase a-z
         this.isEndOfWord = false;
     }
 }
 
-// Trie data structure class
 class Trie {
     constructor() {
-        // Root node of the Trie (empty node)
         this.root = new TrieNode();
     }
-
-    // Inserts a word into the Trie
+    
     insert(word) {
-        let node = this.root;
-        for (const char of word) {
-            // If the character is not a child, add a new TrieNode
-            if (!(char in node.children)) {
-                node.children[char] = new TrieNode();
+        let current = this.root;
+        
+        for (let char of word) {
+            const index = char.charCodeAt(0) - 'a'.charCodeAt(0); // Convert char to index (0-25)
+            
+            // Create new node if it doesn't exist
+            if (current.children[index] === null) {
+                current.children[index] = new TrieNode();
             }
-            // Move to the child node
-            node = node.children[char];
+            
+            current = current.children[index];
         }
+        
         // Mark the end of the word
-        node.isEndOfWord = true;
+        current.isEndOfWord = true;
     }
-
-    // Returns true if the word is in the Trie
+    
     search(word) {
-        let node = this.root;
-        for (const char of word) {
-            // If the character is not found, word doesn't exist
-            if (!(char in node.children)) {
+        let current = this.root;
+        
+        for (let char of word) {
+            const index = char.charCodeAt(0) - 'a'.charCodeAt(0);
+            
+            // If character path doesn't exist, word is not in trie
+            if (current.children[index] === null) {
                 return false;
             }
-            node = node.children[char];
+            
+            current = current.children[index];
         }
-        // Check if current node marks the end of a word
-        return node.isEndOfWord;
+        
+        // Return true only if we've reached end of a complete word
+        return current.isEndOfWord;
     }
-
-    // Returns true if there is any word in the Trie that starts with the given prefix
+    
     startsWith(prefix) {
-        let node = this.root;
-        for (const char of prefix) {
-            // If the character is not found, prefix doesn't exist
-            if (!(char in node.children)) {
+        let current = this.root;
+        
+        for (let char of prefix) {
+            const index = char.charCodeAt(0) - 'a'.charCodeAt(0);
+            
+            // If character path doesn't exist, no word has this prefix
+            if (current.children[index] === null) {
                 return false;
             }
-            node = node.children[char];
+            
+            current = current.children[index];
         }
-        // All characters in prefix found
+        
+        // If we can traverse the entire prefix, it exists
         return true;
     }
 }
+
+// Test the implementation with the provided example
+const trie = new Trie();
+
+console.log("Operations and Results:");
+
+trie.insert("apple");
+console.log("insert('apple') -> null");
+
+console.log("search('apple') ->", trie.search("apple"));   // true
+console.log("search('app') ->", trie.search("app"));       // false
+console.log("startsWith('app') ->", trie.startsWith("app")); // true
+
+trie.insert("app");
+console.log("insert('app') -> null");
+
+console.log("search('app') ->", trie.search("app"));       // true
